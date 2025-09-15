@@ -330,3 +330,205 @@ func (c *Client) GetPlayerRankedAnalysisWithContext(ctx context.Context, account
 		MatchType:    "ranked",
 	}, nil
 }
+
+// プレイヤーのノーマル戦分析データを取得
+func (c *Client) GetPlayerNormalAnalysisWithContext(ctx context.Context, account *Account, matchCount int) (*PlayerMatchSummary, error) {
+	fmt.Printf("ノーマル戦マッチ履歴を取得中（最大%d試合）...\n", matchCount)
+
+	matchIDs, err := c.GetRankedMatchHistoryWithContext(ctx, account.PUUID, matchCount)
+	if err != nil {
+		return nil, fmt.Errorf("マッチ履歴取得エラー: %w", err)
+	}
+
+	fmt.Printf("取得したマッチ数: %d\n", len(matchIDs))
+
+	if len(matchIDs) == 0 {
+		return &PlayerMatchSummary{
+			Account:      *account,
+			MatchHistory: []MatchDetail{},
+			GeneratedAt:  time.Now(),
+			TotalMatches: 0,
+			MatchType:    "normal",
+		}, nil
+	}
+
+	var matchDetails []MatchDetail
+	startTime := time.Now()
+
+	fmt.Printf("マッチ詳細取得開始...\n")
+
+	for i, matchID := range matchIDs {
+		select {
+		case <-ctx.Done():
+			return nil, fmt.Errorf("処理がキャンセルされました: %w", ctx.Err())
+		default:
+		}
+
+		if i%5 == 0 {
+			elapsed := time.Since(startTime)
+			if i > 0 {
+				avgTime := elapsed / time.Duration(i)
+				remaining := avgTime * time.Duration(len(matchIDs)-i)
+				fmt.Printf("進捗: %d/%d (%.1f%%) - 経過: %v, 推定残り: %v\n",
+					i, len(matchIDs), float64(i)/float64(len(matchIDs))*100,
+					elapsed.Round(time.Second), remaining.Round(time.Second))
+			}
+		}
+
+		detail, err := c.GetMatchDetailWithContext(ctx, matchID)
+		if err != nil {
+			fmt.Printf("⚠️  マッチ %s の取得に失敗: %v\n", matchID, err)
+			continue
+		}
+
+		if IsNormalQueue(detail.Info.QueueID) {
+			matchDetails = append(matchDetails, *detail)
+		}
+	}
+
+	totalTime := time.Since(startTime)
+	fmt.Printf("✅ マッチ詳細取得完了: %d試合を%vで処理\n",
+		len(matchDetails), totalTime.Round(time.Second))
+
+	return &PlayerMatchSummary{
+		Account:      *account,
+		MatchHistory: matchDetails,
+		GeneratedAt:  time.Now(),
+		TotalMatches: len(matchDetails),
+		MatchType:    "normal",
+	}, nil
+}
+
+// プレイヤーのARAM分析データを取得
+func (c *Client) GetPlayerARAMAnalysisWithContext(ctx context.Context, account *Account, matchCount int) (*PlayerMatchSummary, error) {
+	fmt.Printf("ARAMマッチ履歴を取得中（最大%d試合）...\n", matchCount)
+
+	matchIDs, err := c.GetRankedMatchHistoryWithContext(ctx, account.PUUID, matchCount)
+	if err != nil {
+		return nil, fmt.Errorf("マッチ履歴取得エラー: %w", err)
+	}
+
+	fmt.Printf("取得したマッチ数: %d\n", len(matchIDs))
+
+	if len(matchIDs) == 0 {
+		return &PlayerMatchSummary{
+			Account:      *account,
+			MatchHistory: []MatchDetail{},
+			GeneratedAt:  time.Now(),
+			TotalMatches: 0,
+			MatchType:    "aram",
+		}, nil
+	}
+
+	var matchDetails []MatchDetail
+	startTime := time.Now()
+
+	fmt.Printf("マッチ詳細取得開始...\n")
+
+	for i, matchID := range matchIDs {
+		select {
+		case <-ctx.Done():
+			return nil, fmt.Errorf("処理がキャンセルされました: %w", ctx.Err())
+		default:
+		}
+
+		if i%5 == 0 {
+			elapsed := time.Since(startTime)
+			if i > 0 {
+				avgTime := elapsed / time.Duration(i)
+				remaining := avgTime * time.Duration(len(matchIDs)-i)
+				fmt.Printf("進捗: %d/%d (%.1f%%) - 経過: %v, 推定残り: %v\n",
+					i, len(matchIDs), float64(i)/float64(len(matchIDs))*100,
+					elapsed.Round(time.Second), remaining.Round(time.Second))
+			}
+		}
+
+		detail, err := c.GetMatchDetailWithContext(ctx, matchID)
+		if err != nil {
+			fmt.Printf("⚠️  マッチ %s の取得に失敗: %v\n", matchID, err)
+			continue
+		}
+
+		if IsARAMQueue(detail.Info.QueueID) {
+			matchDetails = append(matchDetails, *detail)
+		}
+	}
+
+	totalTime := time.Since(startTime)
+	fmt.Printf("✅ マッチ詳細取得完了: %d試合を%vで処理\n",
+		len(matchDetails), totalTime.Round(time.Second))
+
+	return &PlayerMatchSummary{
+		Account:      *account,
+		MatchHistory: matchDetails,
+		GeneratedAt:  time.Now(),
+		TotalMatches: len(matchDetails),
+		MatchType:    "aram",
+	}, nil
+}
+
+// プレイヤーの全ゲーム分析データを取得
+func (c *Client) GetPlayerAllAnalysisWithContext(ctx context.Context, account *Account, matchCount int) (*PlayerMatchSummary, error) {
+	fmt.Printf("全ゲームマッチ履歴を取得中（最大%d試合）...\n", matchCount)
+
+	matchIDs, err := c.GetRankedMatchHistoryWithContext(ctx, account.PUUID, matchCount)
+	if err != nil {
+		return nil, fmt.Errorf("マッチ履歴取得エラー: %w", err)
+	}
+
+	fmt.Printf("取得したマッチ数: %d\n", len(matchIDs))
+
+	if len(matchIDs) == 0 {
+		return &PlayerMatchSummary{
+			Account:      *account,
+			MatchHistory: []MatchDetail{},
+			GeneratedAt:  time.Now(),
+			TotalMatches: 0,
+			MatchType:    "all",
+		}, nil
+	}
+
+	var matchDetails []MatchDetail
+	startTime := time.Now()
+
+	fmt.Printf("マッチ詳細取得開始...\n")
+
+	for i, matchID := range matchIDs {
+		select {
+		case <-ctx.Done():
+			return nil, fmt.Errorf("処理がキャンセルされました: %w", ctx.Err())
+		default:
+		}
+
+		if i%5 == 0 {
+			elapsed := time.Since(startTime)
+			if i > 0 {
+				avgTime := elapsed / time.Duration(i)
+				remaining := avgTime * time.Duration(len(matchIDs)-i)
+				fmt.Printf("進捗: %d/%d (%.1f%%) - 経過: %v, 推定残り: %v\n",
+					i, len(matchIDs), float64(i)/float64(len(matchIDs))*100,
+					elapsed.Round(time.Second), remaining.Round(time.Second))
+			}
+		}
+
+		detail, err := c.GetMatchDetailWithContext(ctx, matchID)
+		if err != nil {
+			fmt.Printf("⚠️  マッチ %s の取得に失敗: %v\n", matchID, err)
+			continue
+		}
+
+		matchDetails = append(matchDetails, *detail)
+	}
+
+	totalTime := time.Since(startTime)
+	fmt.Printf("✅ マッチ詳細取得完了: %d試合を%vで処理\n",
+		len(matchDetails), totalTime.Round(time.Second))
+
+	return &PlayerMatchSummary{
+		Account:      *account,
+		MatchHistory: matchDetails,
+		GeneratedAt:  time.Now(),
+		TotalMatches: len(matchDetails),
+		MatchType:    "all",
+	}, nil
+}

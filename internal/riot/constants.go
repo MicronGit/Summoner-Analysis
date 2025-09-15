@@ -29,3 +29,13 @@ var QueueIDToName = map[int]string{
 func IsRankedQueue(queueID int) bool {
 	return queueID == QueueSoloRanked || queueID == QueueFlexRanked
 }
+
+// ノーマル戦かどうかを判定
+func IsNormalQueue(queueID int) bool {
+	return queueID == QueueNormalDraft || queueID == QueueNormalBlind
+}
+
+// ARAMかどうかを判定
+func IsARAMQueue(queueID int) bool {
+	return queueID == QueueARAM
+}

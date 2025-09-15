@@ -1,0 +1,24 @@
+{
+  "name": "summoner-analysis",
+  "version": "1.0.0",
+  "description": "League of Legends（LoL）のプレイヤーのランク戦成績を分析し、詳細な統計データをJSON形式で出力するツールです。",
+  "main": "index.js",
+  "scripts": {
+    "dev": "vite",
+    "build": "vue-tsc && vite build",
+    "preview": "vite preview",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@types/node": "^24.4.0",
+    "@vitejs/plugin-vue": "^5.2.4",
+    "axios": "^1.12.2",
+    "typescript": "^5.9.2",
+    "vite": "^6.3.6",
+    "vue": "^3.5.21",
+    "vue-tsc": "^3.0.7"
+  }
+}
